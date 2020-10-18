@@ -1,2 +1,2 @@
 # pyneat
-simple implementation of NEAT
+Simple implementation of NEAT
