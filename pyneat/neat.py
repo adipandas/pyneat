@@ -14,9 +14,9 @@ def next_generation(fitnesses, population, partitions):
     Create next generation using current fitness, population and partitions
 
     Args:
-        fitnesses (): dict of fitness values of genomes in current population
-        population : current population (all genomes)
-        partitions : current partitions/species
+        fitnesses (dict[int, float]):  Fitness values of genomes in current population. ``Key`` is genome ID and ``Value`` is genome fitness
+        population (Population): Current population (all genomes).
+        partitions (Partitions): Current partitions (a.k.a. species)
 
     Returns:
         new_population (Population): Updated population for next generation.
@@ -25,8 +25,7 @@ def next_generation(fitnesses, population, partitions):
 
     partition_adjusted_fitnesses = partitions.adjust_fitnesses(fitnesses)       # adjusted fitness (normalized)
 
-    sizes = partitions.next_partition_sizes(partition_adjusted_fitnesses,
-                                            len(population.gid_to_genome))      # populatoin per species
+    sizes = partitions.next_partition_sizes(partition_adjusted_fitnesses, len(population.gid_to_genome))      # populatoin per species
 
     new_population = Population()                                               # new population object
 
@@ -34,9 +33,7 @@ def next_generation(fitnesses, population, partitions):
         size = sizes[pid]                                                       # get proposed size of species
 
         # Sort in order of descending fitness and remove low-fitness members.
-        old_members = sorted(list(p.members),
-                             key=lambda x: fitnesses[x],
-                             reverse=True)                                      # sorted old fitnesses in desc order
+        old_members = sorted(list(p.members), key=lambda x: fitnesses[x], reverse=True)         # sorted old fitnesses in desc order
 
         for gid in old_members[:ELITISM]:                                       # for elite in old species generation
             new_population.gid_to_genome[gid] = population.gid_to_genome[gid]   # add elite to next generation
@@ -52,10 +49,9 @@ def next_generation(fitnesses, population, partitions):
             # choose two members as parents from old population
             gid1, gid2 = random.choice(old_members), random.choice(old_members)
 
-            child = new_population.new_child(population.gid_to_genome[gid1],
-                                             population.gid_to_genome[gid2],
-                                             fitnesses[gid1],
-                                             fitnesses[gid2])                   # create new child member
+            parent1, parent2 = population.gid_to_genome[gid1], population.gid_to_genome[gid2]
+            fitness1, fitness2 = fitnesses[gid1], fitnesses[gid2]
+            child = new_population.new_child(parent1, parent2, fitness1, fitness2)      # create new child member
 
             new_population.gid_to_genome[child.key] = child                     # add new child to new population
             new_population.gid_to_ancestors[child.key] = (gid1, gid2)           # add parents to ancestry of child
@@ -65,21 +61,17 @@ def next_generation(fitnesses, population, partitions):
 
 def run(eval_population_fn, args):
     """
-    run NEAT
+    Run NEAT.
 
     Args:
-        eval_population_fn (partial[]): function to evaluate population. Input for this function is instance of Population class.
+        eval_population_fn (Union[partial[Dict[int, float]], Callable[[Population, bool], Dict[int, float]]]): Fitness function to evaluate population. Input for this function is instance of Population to evaluate.
         args : arguments to initialize the population. `args` has the following attributes:
-            * population_size: initial size of population
-            * input_size: input size of the policy to be evolved
-            * output_size: output size of the policy to be evolved
-            * stop_threshold: threshold to stop the generations
-            * max_generations: int value of maximum number of generations
-            * stop_criterion: it can be a function that evaluates performance per generation by
-            aggregation of fitnesses of whole population. This function can be something like numpy.mean, numpy.max etc.
-
-    Returns
-    -------
+            * population_size (int): initial size of population.
+            * input_size (int): input size of the policy to be evolved.
+            * output_size (int): output size of the policy to be evolved.
+            * stop_threshold (float): Fitness threshold to stop the generations.
+            * max_generations (int): Maximum number of generations.
+            * stop_criterion (Callable): Function that evaluates performance per generation by aggregation of fitnesses of whole population. This function can be something like ``numpy.mean``, ``numpy.max`` etc.
 
     """
     population = Population.initial_population(args)
@@ -88,19 +80,17 @@ def run(eval_population_fn, args):
     stats = defaultdict(list)                                                       # object to log generation history
 
     gen = 0                                                                         # generation count
-
     while True:
         gen += 1                                                                    # increament generations
 
-        # Evaluate fitness
-        fitnesses = eval_population_fn(population)                                  # evaluate current population
+        fitnesses = eval_population_fn(population)                                  # evaluate fitness for current population
 
         # log population statistics
         mean_population_fitness = np.mean(list(fitnesses.values()))
         max_population_fitness = np.max(list(fitnesses.values()))
 
-        stats['mean'].append(mean_population_fitness)                       # max fitness in current generation
-        stats['max'].append(max_population_fitness)                       # mean fitness in current generation
+        stats['mean'].append(mean_population_fitness)          # mean fitness in current generation
+        stats['max'].append(max_population_fitness)            # max fitness in current generation
 
         # check stop condition, i.e., if fitness > fitness_threshold or max number of generations reached
         if args.stop_criterion(list(fitnesses.values())) >= args.stop_threshold or gen > args.max_generations:
@@ -114,9 +104,7 @@ def run(eval_population_fn, args):
                 eval_population_fn(eval_pop, render=True)
             break
 
-        print("generation %d\t fitness\tmean %.3f\tmax %.3f\npopulation %d in %d partitions\n" %
-              (gen, float(np.mean(list(fitnesses.values()))), np.max(list(fitnesses.values())),
-               len(population.gid_to_genome), len(partitions.pid_to_partition)))
+        print(f"generation:{gen:4d}\tmean_fitness:{float(np.mean(list(fitnesses.values()))):.3f}\tmax_fitness:{np.max(list(fitnesses.values())):.3f}\tpopulation:{len(population.gid_to_genome):4d}\tpartitions: {len(partitions.pid_to_partition):4d}")
 
         # Create next generation
         population = next_generation(fitnesses, population, partitions)

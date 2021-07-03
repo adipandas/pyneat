@@ -9,7 +9,7 @@ from pyneat.crossover import crossover
 from pyneat.utils import creates_cycle
 
 
-class Genome(object):
+class Genome:
     """
     Genome is a direct encoding of neural network.
 

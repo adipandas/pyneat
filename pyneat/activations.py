@@ -59,19 +59,35 @@ def relu(z):
     return np.maximum(z, 0)
 
 
-def abs(z):
+def step(x, thresold=0, step_val=1.):
     """
-    Absolute value.
+    Step function.
 
     Args:
-        z (float or numpy.ndarray): Input.
+        x (float): Input value.
+        thresold (float): Thresold of step function.
+        step_val (float): Value of the step function.
 
     Returns:
-        float or numpy.ndarray: Output of activation.
-
+        float: Output.
     """
-    return np.abs(z)
+    return step_val if x > thresold else 0.
+
+
+def sin(x):
+    return np.sin(x)
+
+
+def cos(x):
+    return np.sin(x)
+
+
+def linear(x, a=2.0):
+    return x*a
+
+
+absolute = lambda x: np.abs(x)
 
 
 # All possible values of activation functions
-ACTIVATIONS = [sigmoid, tanh, relu, abs]
+ACTIVATIONS = [sigmoid, tanh, relu, absolute, sin, cos, step, linear]

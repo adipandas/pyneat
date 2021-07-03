@@ -1,4 +1,3 @@
-from pyneat.genome import Genome
 import random
 
 
@@ -10,13 +9,13 @@ def crossover(obj1, obj2, obj_new, attrs):
     parent objects with probability of 50%.
 
     Args:
-        obj1 (Genome or Node or Edge): parent object 1
-        obj2 (Genome or Node or Edge): parent object 2
-        obj_new (Genome or Node or Edge): child object
+        obj1 (pyneat.genome.Genome or pyneat.node.Node or pyneat.edge.Edge): parent object 1
+        obj2 (pyneat.genome.Genome or pyneat.node.Node or pyneat.edge.Edge): parent object 2
+        obj_new (pyneat.genome.Genome or pyneat.node.Node or pyneat.edge.Edge): child object
         attrs (list[str]): list of attributes to update in child object
 
     Returns:
-        Genome or Node or Edge: Updated child object after cross over
+        pyneat.genome.Genome or pyneat.node.Node or pyneat.edge.Edge: Updated child object after cross over
     """
 
     for attr in attrs:                                      # for each attribute in list of input attributes

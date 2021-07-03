@@ -1,5 +1,4 @@
 from typing import Callable, Union, Iterable
-from pyneat.genome import Genome
 
 
 class EvalNode(object):
@@ -44,7 +43,7 @@ class NeuralNetwork(object):
         Make a network.
 
         Args:
-            genome (Genome): genome used for creation of network-phenotype
+            genome (pyneat.genome.Genome): genome used for creation of network-phenotype
 
         Returns:
             NeuralNetwork: neural network phenotype of genome
@@ -143,7 +142,7 @@ class NeuralNetwork(object):
         Args:
             layers list[set[int]]: Layers in neural network.
             edges (list[Tuple[int, int]] or Iterable[Tuple[int, int]]): Edges in neural network connecting nodes.
-            genome (Genome): Genome or Genotype of neural network.
+            genome (pyneat.genome.Genome): Genome or Genotype of neural network.
 
         Returns:
             list[EvalNode]: list of EvalNodes or phenotype-neurons to evaluate during each iteration.

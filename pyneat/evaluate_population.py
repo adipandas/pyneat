@@ -1,9 +1,7 @@
 from functools import partial
 import gym
 import numpy as np
-
-from pyneat.network import Network
-from pyneat.population import Population
+from pyneat.network import NeuralNetwork
 
 
 def gym_eval_population(env, population, render=False):
@@ -12,7 +10,7 @@ def gym_eval_population(env, population, render=False):
 
     Args:
         env (gym.Env): Gym environment.
-        population (Population): Population of agents to evaluate on gym environment.
+        population (pyneat.population.Population): Population of agents to evaluate on gym environment.
         render (bool): If ``True``, render environment while evaluation.
 
     Returns:
@@ -22,7 +20,7 @@ def gym_eval_population(env, population, render=False):
     fitnesses = {}
 
     for gid, g in population.gid_to_genome.items():
-        net = Network.make_network(g)
+        net = NeuralNetwork.make_network(g)
 
         episode_reward = 0
         num_episodes_per_eval = 5
@@ -58,7 +56,7 @@ def create_gym_eval_population_fn(env: gym.Env):
         env (gym.Env): Environment object for which the evaluation function is created.
 
     Returns:
-        partial[Dict[int, float]]: Evaluation function for the given gym environment.
+        Union[partial[dict], Callable[[pyneat.population.Population, bool], Dict[int, float]]]: Evaluation function for the given gym environment.
     """
     eval_func = partial(gym_eval_population, env)
     return eval_func
@@ -69,7 +67,7 @@ def xor_eval_population(population):
     Evaluation of population for solving the XOR problem.
 
     Args:
-        population (Population): Population of agents to evaluate.
+        population (pyneat.population.Population): Population of agents to evaluate.
 
     Returns:
         dict[int, float]: Dictionary with ``key-value`` pairs of genome (``key`` as genome id) in the population and corresponding fitnesses (``value``) of each.
@@ -79,7 +77,7 @@ def xor_eval_population(population):
 
     fitnesses = dict()
     for gid, g in population.gid_to_genome.items():
-        net = Network.make_network(g)
+        net = NeuralNetwork.make_network(g)
         fitness = 4.0
         for xi, xo in zip(xor_inputs, xor_outputs):
             output = net.forward(xi)

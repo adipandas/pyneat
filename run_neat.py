@@ -1,20 +1,18 @@
 """
 Run with using following commands in terminal:
-$ cd ./developmental-gym
-$ python -m gym_developmental.control_policies.pyneat.run_neat --task=xor
-
+$ python run_neat.py --task=cartpole
 """
 
 if __name__ == '__main__':
-    import numpy as np
     import argparse
+    import numpy as np
     import gym
 
     from pyneat.evaluate_population import xor_eval_population, create_gym_eval_population_fn
     from pyneat.neat import run
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--task', choices=['xor', 'cartpole', 'lunar'], required=True)
+    parser.add_argument('--task', choices=['xor', 'cartpole', 'lunar'], default='cartpole')
 
     args = parser.parse_args()
 

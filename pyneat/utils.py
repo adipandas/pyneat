@@ -5,9 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from pyneat.genome import Genome
-from pyneat.node import Node
-
 
 def creates_cycle(edges, u, v):
     """
@@ -60,7 +57,7 @@ def visualize(candidate, stats):
     Visualizing the phenotype (a.k.a. neural network).
 
     Args:
-        candidate (Genome): Neural network candidate.
+        candidate (pyneat.genome.Genome): Neural network candidate.
         stats (dict[str, float or int or list or tuples]): Dict containing the statistics of genome.
     """
 
@@ -97,7 +94,7 @@ def visualize(candidate, stats):
         Color.
 
         Args:
-            v (Node): nodes/vertex in graph
+            v (pyneat.node.Node): nodes/vertex in graph
 
         Returns:
             str: color of vertex, green for input, red for output, blue for hidden

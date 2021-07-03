@@ -46,10 +46,13 @@ class Population(object):
         Partition population by similarity.
 
         Args:
-            initial_partitions (Partitions):
+            initial_partitions (Partitions): Set of Partitions under consideration
 
         Returns:
-            create new partitions/species for next generation.
+            Partitions: New partitions/species for next generation.
+
+        Notes:
+            Partition represents a species in populatoin.
         """
 
         unpartitioned = set(self.gid_to_genome.keys())                # set of unpartitioned/unspeciated genome
@@ -81,16 +84,14 @@ class Population(object):
         """
         Enables populating the new population object with a new child created using two input parents.
 
-        Parameters
-        ----------
-        p1 : parent 1 genome
-        p2 : parent 2 genome
-        f1 : fitness of parent 1
-        f2 : fitness of parent 2
+        Args:
+            p1 (Genome): parent 1 genome
+            p2 (Genome): parent 2 genome
+            f1 (float): fitness of parent 1
+            f2 (float): fitness of parent 2
 
-        Returns
-        -------
-        new child genome
+        Returns:
+            Genome: new child genome
         """
         child = Genome(next(Population.global_count), len(p1.input_keys), len(p1.output_keys))
 

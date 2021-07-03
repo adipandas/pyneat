@@ -1,8 +1,6 @@
 import numpy as np
 from itertools import count
 from pyneat.config import COMPATIBILITY_THRESHOLD, MIN_FITNESS_RANGE, MIN_SPECIES_SIZE
-from pyneat.genome import Genome
-from pyneat.population import Population
 
 
 class Partition(object):
@@ -12,7 +10,7 @@ class Partition(object):
     Args:
         key (int): unique key/id of partition
         members (list): members of partition/species. Default is empty list [].
-        representative (Genome): representative of partition, instance of `Genome` class
+        representative (pyneat.genome.Genome): representative of partition, instance of `Genome` class
     """
 
     def __init__(self, key, members=[], representative=None):
@@ -26,10 +24,10 @@ class Partition(object):
 
         Args:
             gids (set or list or tuple): set of genome ids which do not belong to any partition
-            population (Population): population containing genomes in which we have to find the representative, instance of Population
+            population (pyneat.population.Population): population containing genomes in which we have to find the representative, instance of Population
 
         Returns:
-            Genome: Closest candidate genome to the current representative.
+            pyneat.genome.Genome: Closest candidate genome to the current representative.
         """
 
         candidates = []
@@ -66,7 +64,7 @@ class Partitions(object):
         Parameters:
             pid (id): partition id
             members (list[int]): members/candidates from population to be included in the partition/species
-            representative (Genome): representative of the new partition (genome representing the new species/partition)
+            representative (pyneat.genome.Genome): representative of the new partition (genome representing the new species/partition)
 
         Notes:
             * Partition is a species
@@ -82,10 +80,10 @@ class Partitions(object):
         Evaluate closest representative of a species to input genome
 
         Args:
-            genome (Genome): genome or neural network.
+            genome (pyneat.genome.Genome): Genome or neural network.
 
         Returns:
-            int: id of species which is closest to input genome
+            int: Species ID closest to input genome
 
         Notes:
             * Partition is a species
@@ -109,7 +107,7 @@ class Partitions(object):
         Adjust fitnesses is calculated for each partition (a.k.a. species). Mean fitness of each partition is evaluated. This mean fitness is then normalized. The normalized fitness is returned as adjusted fitness.
 
         Args:
-            fitnesses (dict[int, float]): dictionary of fitnesses of genomes in population.
+            fitnesses (dict[int, float]): Fitnesses of genomes in population. ``(Key, Value)`` is (``Genome ID``, ``Genome Fitness``).
 
         Returns:
             dict[int, float]: of adjusted (normalized) fitnesses of each partition.
@@ -137,31 +135,31 @@ class Partitions(object):
         Decide partition sizes for the next generation by fitness. Based on Neat-Python.
 
         Args:
-            partition_adjusted_fitnesses (dict[int, float]): adjusted (normalized) fitness of each generation's species
-            pop_size (int):  size of population.
+            partition_adjusted_fitnesses (dict[int, float]): Adjusted (normalized) fitness of each generation's species.
+            pop_size (int):  Size of population.
 
         Returns:
-            dict[]: dict of population size of each partition
+            dict[int, int]: New population size of each partition. ``Key`` is partition ID and ``Value`` is size of partition.
 
+        Notes:
+            * Partition represents a species in the current population.
+            * To avoid extinction of any species in the population, we keep at least ``MIN_SPECIES_SIZE`` for each partition.
         """
 
         previous_sizes = {pid: len(p.members) for pid, p in self.pid_to_partition.items()}  # partition size for each species in previous generation
 
         af_sum = sum(partition_adjusted_fitnesses.values())     # sum of adjusted fitness of each partition
 
-        sizes = {}
+        sizes = dict()
 
-        # min_species_size = 2
-        for pid in partition_adjusted_fitnesses:                # for each partition/species in current generation
+        for pid in partition_adjusted_fitnesses:                                               # for each partition in current generation
 
-            if af_sum > 0:                                      # if adjusted fitness sum is positive
-                s = max(MIN_SPECIES_SIZE,
-                        partition_adjusted_fitnesses[pid]/af_sum*pop_size)   # species size proportional to its fitness
+            if af_sum > 0:                                                                     # if adjusted fitness sum is positive
+                s = max(MIN_SPECIES_SIZE, partition_adjusted_fitnesses[pid]/af_sum*pop_size)   # species size proportional to its fitness
             else:
-                s = MIN_SPECIES_SIZE                            # to avoid extinction of species in next generation
+                s = MIN_SPECIES_SIZE                                                           # to avoid extinction of species in next generation
 
-            # difference between new and previous generation population of species
-            d = (s - previous_sizes[pid]) * 0.5
+            d = (s - previous_sizes[pid]) * 0.5                   # difference between new and previous generation population of species
 
             c = int(round(d))
 
@@ -176,6 +174,5 @@ class Partitions(object):
             sizes[pid] = size
 
         normalizer = pop_size / sum(sizes.values())
-
         sizes = {pid: max(MIN_SPECIES_SIZE, int(round(size * normalizer))) for pid, size in sizes.items()}
         return sizes
