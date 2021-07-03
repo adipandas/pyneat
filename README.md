@@ -1,6 +1,6 @@
-[inverted_pendulum_gif]: media/inverted_pendulum.gif "Inverted Pendulum GIF"
-[inverted_pendulum_plot]: media/inverted_pendulum_NEAT.png "Inverted Pendulum PLOT"
-[inverted_pendulum_neural_network]: media/inverted_pendulum_network_NEAT.png "Inverted Pendulum Neural Network"
+
+[inverted_pendulum_plot]:  "Inverted Pendulum PLOT"
+[inverted_pendulum_neural_network]:  "Inverted Pendulum Neural Network"
 [lunar_lander_gif]: media/lunar_lander.gif "Lunar lander GIF"
 [lunar_lander_plot]: media/lunar_lander_NEAT.png "Lunar lander PLOT"
 [lunar_lander_neural_network]: media/lunar_lander_network_NEAT.png "Lunar lander Neural Network"
@@ -9,8 +9,8 @@
 
  Environments | Plot (reward vs. iterations) | Network Architecture
 :---: | :---: | :---:
-<img src="media/inverted_pendulum.gif" width="250" height="250"/> | <img src="media/inverted_pendulum.gif" width="250" height="250"/> | <img src="media/inverted_pendulum.gif" width="250" height="250"/>
- ![lunar_lander_gif][lunar_lander_gif] | ![lunar_lander_plot][lunar_lander_plot] | ![lunar_lander_neural_network][lunar_lander_neural_network]
+<img src="media/inverted_pendulum.gif" width="250" height="200"/> | <img src="media/inverted_pendulum_NEAT.png" width="250" height="200"/> | <img src="media/inverted_pendulum_network_NEAT.png" width="250" height="200"/>
+<img src="media/lunar_lander.gif" width="250" height="200"/> | <img src="media/lunar_lander_NEAT.png" width="250" height="200"/> | <img src="media/lunar_lander_network_NEAT.png" width="250" height="200"/>
 
 ## Installation
 
