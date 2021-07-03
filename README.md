@@ -1,12 +1,16 @@
-[neat_inverted_pendulum]: media/inverted_pendulum_all.gif "Sample of gazebo sim"
-[neat_lunar_lander]: media/lunar_lander_all.gif "Sample of rviz"
+[inverted_pendulum_gif]: media/inverted_pendulum.gif "Inverted Pendulum GIF"
+[inverted_pendulum_plot]: media/inverted_pendulum_NEAT.png "Inverted Pendulum PLOT"
+[inverted_pendulum_neural_network]: media/inverted_pendulum_network_NEAT.png "Inverted Pendulum Neural Network"
+[lunar_lander_gif]: media/lunar_lander.gif "Lunar lander GIF"
+[lunar_lander_plot]: media/lunar_lander_NEAT.png "Lunar lander PLOT"
+[lunar_lander_neural_network]: media/lunar_lander_network_NEAT.png "Lunar lander Neural Network"
 
 # NEAT: NeuroEvolution of Augmenting Topologies
 
-| Trained Policies |
-:------:
-| ![neat_inverted_pendulum][neat_inverted_pendulum] |
-| ![neat_lunar_lander][neat_lunar_lander] |
+ Policies | Plot (reward vs. iterations) | Network Architecture
+:---: | :---: | :---:
+![inverted_pendulum_gif][inverted_pendulum_gif] | ![inverted_pendulum_plot][inverted_pendulum_plot] | ![inverted_pendulum_neural_network][inverted_pendulum_neural_network]
+ ![lunar_lander_gif][lunar_lander_gif] | ![lunar_lander_plot][lunar_lander_plot] | ![lunar_lander_neural_network][lunar_lander_neural_network]
 
 ## Installation
 
