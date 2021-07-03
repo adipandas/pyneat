@@ -2,37 +2,51 @@ from copy import deepcopy
 import random
 from itertools import count
 
-from gym_developmental.control_policies.pyneat.config import NODE_DISJOINT_COEFF, EDGE_DISJOINT_COEFF, MIN_NODE_COUNT, \
-    NODE_ADD_PROB, NODE_DEL_PROB, EDGE_ADD_PROB, EDGE_DEL_PROB
-
-from gym_developmental.control_policies.pyneat.node import Node
-from gym_developmental.control_policies.pyneat.edge import Edge
-from gym_developmental.control_policies.pyneat.utils import crossover, creates_cycle
+from pyneat.config import NODE_DISJOINT_COEFF, EDGE_DISJOINT_COEFF, MIN_NODE_COUNT, NODE_ADD_PROB, NODE_DEL_PROB, EDGE_ADD_PROB, EDGE_DEL_PROB
+from pyneat.node import Node
+from pyneat.edge import Edge
+from pyneat.crossover import crossover
+from pyneat.utils import creates_cycle
 
 
 class Genome(object):
     """
-    Genome is a network.
+    Genome is a direct encoding of neural network.
+
+    Args:
+        key (int): Unique id for the genome.
+        input_size (int): Input size of the genome.
+        output_size (int): Output size of the genome.
+
+    Notes:
+        - Genome is a representation of neural network in NEAT.
+        - Nodes in each genome represent a neuron.
+        - Edge in each genome represent a connection between two neurons (nodes).
     """
+
     node_count = count(MIN_NODE_COUNT)                 # counter to keep track of node-keys in genomes
 
     def __init__(self, key, input_size, output_size):
-        """
-
-        Parameters
-        ----------
-        key : unique identity of genome
-        input_size :  size of input to genome
-        output_size :   size of output from genome
-        """
-
-        self.nodes = {}                                                 # dictionary of nodes in the network
-        self.edges = {}                                                 # dictionary of edges in the network
 
         self.key = key
+        """int: Unique ID for each genome.
+        """
 
-        self.input_keys = [-1 * i for i in range(1, input_size + 1)]     # input keys: initialized as -ve integers
-        self.output_keys = [i for i in range(output_size)]               # output keys
+        self.nodes = dict()
+        """dict[int, Node]: Dictionary of nodes in the genome (a.k.a. network).
+        """
+
+        self.edges = dict()
+        """dict[int, Edge]: Dictionary of edges in the genome (a.k.a. network).
+        """
+
+        self.input_keys = [-1 * i for i in range(1, input_size + 1)]
+        """list: Input node (a.k.a. neuron) keys initialized as -ve integers
+        """
+
+        self.output_keys = [i for i in range(output_size)]
+        """list: Output neuron keys.
+        """
 
         # Initialize output nodes.
         for k in self.output_keys:
@@ -45,35 +59,33 @@ class Genome(object):
 
     def dist(self, other):
         """
-        Distance between this and other genome
-        Note: genome is a neural network
+        Distance between this and other genome.
 
-        Parameters
-        ----------
-        other : genome from which the distance of this genome is calculated
+        Args:
+            other (Genome): Genome from which the distance of this genome is calculated.
 
-        Returns
-        -------
-        distance between this and other genome
+        Returns:
+            float: distance between this and other genome
 
+        Notes:
+            - Genome is a neural network.
+            - Distance between two genomes is sum of distances between their edges and nodes.
         """
-
         d = self._nodes_dist(other) + self._edges_dist(other)
         return d
 
     def _nodes_dist(self, other):
         """
-        Distance between nodes/neurons of two genomes, i.e., this genome and other genome
-        Note: genome is a neural network
+        Distance between nodes/neurons of two genomes, i.e., this genome and other genome.
 
-        Parameters
-        ----------
-        other : genome from which the distance is calculated
+        Parameters:
+            other (Genome): Genome from which the distance is calculated.
 
-        Returns
-        -------
-        distance between nodes of two genomes
+        Returns:
+            float: distance between nodes of two genomes.
 
+        Notes:
+            - Genome is a neural network.
         """
 
         disjoint_nodes = 0                      # measure of how much disjoint two genomes are (disjoint-ness score)
@@ -100,17 +112,16 @@ class Genome(object):
 
     def _edges_dist(self, other):
         """
-        Distance between edges of this genome and the other genome
-        Note: genome is a neural network
+        Distance between **edges** of this genome and the other genome.
 
-        Parameters
-        ----------
-        other : genome w.r.t. which distance is calculated between the edges
+        Parameters:
+            other (Genome): Genome w.r.t. which distance is calculated between the edges.
 
-        Returns
-        -------
-        distance w.r.t. edges between this and other genome
+        Returns:
+            float: Distance w.r.t. edges between this and other genome.
 
+        Notes:
+            - Genome is a neural network.
         """
 
         d = 0.0
@@ -132,53 +143,47 @@ class Genome(object):
 
             max_edges = max(len(self.edges), len(other.edges))          # max number of edges by comparing both genomes
 
-            # distance w.r.t. edges between this and other genome
+            # overall distance between this and other genome w.r.t. edges
             d = (d + (EDGE_DISJOINT_COEFF * disjoint_edges)) / max_edges
 
         return d
 
     def crossover_edges(self, other, child):
         """
-        Cross over between edges in this genome and other genome to update a child genome
-        Note: genome is a neural network
+        Cross over between **edges** in this genome and other genome to update a child genome
 
-        Parameters
-        ----------
-        other : other genome
-        child : child genome
+        Args:
+            other (Genome): other genome
+            child (Genome): child genome
 
-        Returns
-        -------
-        updated child genome after the cross-over of edges
+        Returns:
+            Genome: updated child genome after the cross-over of edges
 
+        Notes:
+            - Genome is a neural network.
         """
         for key, edge_p1 in self.edges.items():         # for each egde in edges of this (self) parent genome
             edge_p2 = other.edges.get(key)              # get the edge with same key from other parent genome
             if edge_p2 is None:                         # if other parent genome does NOT contain edge with same keys
                 child.edges[key] = deepcopy(edge_p1)    # copy edge from this (self) parent genome to child genome
             else:                                       # if edge is present in both parents
-                child.edges[key] = crossover(
-                    edge_p1, edge_p2,
-                    Edge(key[0], key[1]),
-                    attrs=['weight', 'active'])         # follow crossover logic
+                child.edges[key] = crossover(edge_p1, edge_p2, Edge(key[0], key[1]), attrs=['weight', 'active'])         # follow crossover logic
         return child
 
     def crossover_nodes(self, other, child):
         """
-        Crossover between nodes in this genome and other genome to update a child genome.
-        In node crossover, if a node is present in this genome (parent 1 or p1) as well as other genome (parent 2 or p2)
+        Crossover between **nodes** in this genome and other genome to update a child genome. In node crossover, if a node is present in this genome (parent 1 or p1) as well as other genome (parent 2 or p2)
         there is addition of a new node in child genome.
-        Note: genome is a neural network.
 
-        Parameters
-        ----------
-        other : other genome
-        child : child genome
+        Args:
+            other (Genome): other genome
+            child (Genome): child genome
 
-        Returns
-        -------
-        updated child genome after the cross-over of two genomes w.r.t nodes
+        Returns:
+            Genome: updated child genome after the cross-over of two genomes w.r.t nodes
 
+        Notes:
+            - Genome is a neural network.
         """
 
         for key, node_p1 in self.nodes.items():             # for each node in this (parent 1 or p1) genome
@@ -186,26 +191,22 @@ class Genome(object):
             if node_p2 is None:                             # if parent-2 does NOT have the node with same key
                 child.nodes[key] = deepcopy(node_p1)        # copy the node from this genome (p1) to child genome as is
             else:                                           # if node with same key present in both parents p1 and p2
-                child.nodes[key] = crossover(
-                    node_p1, node_p2,
-                    Node(next(Genome.node_count)),
-                    attrs=['bias', 'response', 'activation', 'aggregation'])  # crossover logic: add new node in child
+                child.nodes[key] = crossover(node_p1, node_p2, Node(next(Genome.node_count)), attrs=['bias', 'response', 'activation', 'aggregation'])  # crossover logic: add new node in child
 
         return child
 
     def mutate_(self):
         """
         Mutate this genome.
-        Genome mutation may include one or more of the following:
-            * add node to genome
-            * delete node from genome
-            * add new edge to genome
-            * delete edge from genome
-            * mutate node-properties of nodes in this genome
-            * mutate edge-properties of edges in this genome
 
-        Returns
-        -------
+        Notes:
+            Genome mutation may include one or more of the following:
+                * add node to genome
+                * delete node from genome
+                * add new edge to genome
+                * delete edge from genome
+                * mutate node-properties of nodes in this genome
+                * mutate edge-properties of edges in this genome
 
         """
         self._mutate_add_node_()
@@ -217,11 +218,7 @@ class Genome(object):
 
     def _mutate_add_node_(self):
         """
-        Genome mutation by addition of node
-
-        Returns
-        -------
-
+        Genome mutation by addition of node.
         """
         if random.random() < NODE_ADD_PROB:
             if len(self.edges) == 0:                                        # if no edge in the genome do nothing
@@ -231,22 +228,19 @@ class Genome(object):
 
             new_node = Node(next(Genome.node_count))                        # create a new node
             self.nodes[new_node.key] = new_node                             # add the new node to the genome
-
-            edge_u_to_new = Edge(edge_to_split.uv[0],
-                                 new_node.key,
-                                 weight=1.0)                                # create edge to new node from node `u`
+            edge_u_to_new = Edge(edge_to_split.uv[0], new_node.key, weight=1.0)     # create edge to new node from node `u`
             self.edges[edge_u_to_new.uv] = edge_u_to_new                    # add edge to new node from node `u`
 
-            edge_new_to_v = Edge(new_node.key,
-                                 edge_to_split.uv[1],
-                                 weight=edge_to_split.weight)               # create edge from new node to node `v`
+            edge_new_to_v = Edge(new_node.key, edge_to_split.uv[1], weight=edge_to_split.weight)   # create edge from new node to node `v`
             self.edges[edge_new_to_v.uv] = edge_new_to_v                    # add edge from new node to node `v`
 
     def _mutate_del_node_(self):
+        """
+        Genome mutation by deletion of node.
+        """
         if random.random() < NODE_DEL_PROB:
 
-            # can delete any node except output nodes
-            available_nodes = [k for k in self.nodes.keys() if k not in self.output_keys]
+            available_nodes = [k for k in self.nodes.keys() if k not in self.output_keys]   # can delete any node except output nodes
 
             if available_nodes:                                # if there is atleaset one available node
                 del_key = random.choice(available_nodes)       # randomly choose the node to delete (node key)
@@ -265,10 +259,6 @@ class Genome(object):
     def _mutate_add_edge_(self):
         """
         Mutate genome by addition of edge
-
-        Returns
-        -------
-
         """
 
         if random.random() < EDGE_ADD_PROB:
@@ -297,11 +287,10 @@ class Genome(object):
 
     def _mutate_del_edge_(self):
         """
-        Genome mutation by deleting edge in the network
+        Genome mutation by deleting a randomly selected edge in the network.
 
-        Returns
-        -------
-
+        Notes:
+            * This mutation happens with some probability for deletion defined in the configuration file hyperparameters ``EDGE_DEL_PROB``.
         """
         if random.random() < EDGE_DEL_PROB:
             if len(self.edges) > 0:                           # if there is atleast one edge in genome (neural network)
@@ -310,22 +299,14 @@ class Genome(object):
 
     def _mutate_edge_properties(self):
         """
-        Genome mutation by mutating edge properties
-
-        Returns
-        -------
-
+        Genome mutation by mutating properties of each edge.
         """
         for edge in self.edges.values():            # for each edge in network
             edge.mutate_()                          # mutate edge
 
     def _mutate_node_properties(self):
         """
-        Genome mutation by mutating node properties
-
-        Returns
-        -------
-
+        Genome mutation by mutating properties of each node.
         """
         for node in self.nodes.values():            # for each node in network
             node.mutate_()                          # mutate node

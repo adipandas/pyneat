@@ -1,68 +1,66 @@
 from itertools import count
-from gym_developmental.control_policies.pyneat.genome import Genome
-from gym_developmental.control_policies.pyneat.partitions import Partitions
+from pyneat.genome import Genome
+from pyneat.partitions import Partitions
 
 
 class Population(object):
+    """
+    Class to handle all the population of genomes.
+    """
+
     global_count = count(1)
 
     def __init__(self):
-        self.gid_to_genome = {}                                         # id to genome mapping
-        self.gid_to_ancestors = {}                                      # id to genome ancestors mapping
+        self.gid_to_genome = dict()
+        """dict[int, Genome]: id to genome mapping"""
+
+        self.gid_to_ancestors = dict()
+        """dict[int, Genome]: id to genome ancestors mapping"""
 
     @classmethod
     def initial_population(cls, args):
         """
+        Instantiate initial population.
 
-        Parameters
-        ----------
-        args : arguments to initialize the population. `args` has the following attributes:
-            * population_size: initial size of population
-            * input_size: input size of the policy to be evolved
-            * output_size: output size of the policy to be evolved
+        Args:
+            args: Arguments to initialize the population. `args` has the following attributes:
+                - population_size (int): initial size of population
+                - input_size (int): input size of the policy to be evolved
+                - output_size (int): output size of the policy to be evolved
 
-        Returns
-        -------
-        Population created using the parameters passed in as `args`
-
+        Returns:
+            Population: Population created using the parameters passed in as `args`
         """
         pop = cls()                                                     # create population object
 
-        for _ in range(args.population_size):                           # for each individual in population_size
-            gid = next(Population.global_count)                         # create new genome_id for each individual
+        for _ in range(args.population_size):                                                 # for each individual in population_size
+            gid = next(Population.global_count)                                               # create new genome_id for each individual
 
-            pop.gid_to_genome[gid] = Genome(gid,
-                                            args.input_size,
-                                            args.output_size)           # create genome/individual/neural-network
+            pop.gid_to_genome[gid] = Genome(gid, args.input_size, args.output_size)           # create genome/individual/neural-network
+            pop.gid_to_ancestors[gid] = tuple()                                               # gid to ancestors mapping, initialize as empty
 
-            pop.gid_to_ancestors[gid] = tuple()                         # gid to ancestors mapping, initialize as empty
         return pop
 
     def partition(self, initial_partitions):
         """
         Partition population by similarity.
 
-        Parameters
-        ----------
-        initial_partitions :
+        Args:
+            initial_partitions (Partitions):
 
-        Returns
-        -------
-        create new partitions/species for next generation
-
+        Returns:
+            create new partitions/species for next generation.
         """
 
         unpartitioned = set(self.gid_to_genome.keys())                # set of unpartitioned/unspeciated genome
-        new_partitions = Partitions()                                 # instantiate a empty species/partitions
+        new_partitions = Partitions()                                 # instantiate empty species/partitions
 
         # Find new representatives (retain the old partitions ids).
         for pid, p in initial_partitions.pid_to_partition.items():    # for each partition in initial_partitions
 
             new_rep = p.find_representative(unpartitioned, self)      # find representative of partition - genome
 
-            new_partitions.new_partition(pid,
-                                         members=[new_rep.key],
-                                         representative=new_rep)      # find representative population
+            new_partitions.new_partition(pid, members=[new_rep.key], representative=new_rep)      # find representative population
 
             unpartitioned.remove(new_rep.key)                         # remove the new representative genome
 
@@ -73,9 +71,7 @@ class Population(object):
             g = self.gid_to_genome[gid]                              # get genome with genome_id
             pid = new_partitions.closest_representative(g)           # eval partition_id of species closest to genome
             if pid is None:                                          # if partition_id does not exist
-                new_partitions.new_partition(pid,
-                                             members=[gid],
-                                             representative=g)       # create new partition for genome
+                new_partitions.new_partition(pid, members=[gid], representative=g)       # create new partition for genome
             else:                                                    # if closest partition_id exists
                 new_partitions.pid_to_partition[pid].members.append(gid)   # put genome in the closest partition_id
 

@@ -1,42 +1,58 @@
 import random
 import numpy as np
 
-from gym_developmental.control_policies.pyneat.config import BIAS_INIT_SCALE, NODE_DIST_COEFF, BIAS_MUTATE_RATE, \
-    BIAS_MUTATE_SCALE, BIAS_REINIT_RATE, ACTIVATION_MUTATE_RATE
+from pyneat.config import BIAS_INIT_SCALE, NODE_DIST_COEFF, BIAS_MUTATE_RATE, BIAS_MUTATE_SCALE, BIAS_REINIT_RATE, ACTIVATION_MUTATE_RATE
 
-from gym_developmental.control_policies.pyneat.activations import sigmoid, ACTIVATIONS
+from pyneat.activations import sigmoid, ACTIVATIONS
 
 
 class Node(object):
     """
-    Class to create a node/neuron in a network
+    Class to create a node/neuron in a network.
+
+    Args:
+        key (int): unique id of the node.
+
+    Notes:
+        * Neuron and Node are the same thing. These two terms are used interchangablely.
     """
     def __init__(self, key):
+        self.key = key
+        """int: Unique ID of the node.
         """
 
-        Parameters
-        ----------
-        key : unique id of the node
-        """
+        self.bias = np.random.normal(0, BIAS_INIT_SCALE)
+        """float: Bias of the neuron."""
 
-        self.bias = np.random.normal(0, BIAS_INIT_SCALE)        # bias of the network
         self.response = 1.0
-        self.activation = sigmoid                               # activation function of the node
-        self.aggregation = np.sum                               # agregation function of the node
-        self.key = key                                          # unique id/key of the node
+        """float: Default is ``1.0``.
+        """
+
+        self.activation = sigmoid
+        """callable: Activation function of the node. Default is ``sigmoid``.
+        """
+
+        self.aggregation = np.sum
+        """callable: Input aggregation function for the node. Default is ``np.sum``.
+        """
 
     def dist(self, other):
         """
-        calculate distance between two nodes
+        Calculate distance between two nodes.
 
-        Parameters
-        ----------
-        other : other node wrt which distance is to be calculated
+        Args:
+            other (Node): other node w.r.t. which distance is calculated.
 
-        Returns
-        -------
-        distance between `self`(this) node and other node.
+        Returns:
+            float: Distance between `self` (this) node and other node.
+
+        Notes:
+            * Calculation of distance between two nodes (a.k.a. neurons) involves:
+                - Magnitude of difference between ``bias`` values of each neuron.
+                - ``activation`` attribute comparison of two neurons.
+                - ``aggregation`` attribute comparison of two neurons.
         """
+
         d = abs(self.bias - other.bias)
         if self.activation != other.activation:
             d += 1.0
@@ -47,10 +63,6 @@ class Node(object):
     def mutate_(self):
         """
         Mutation of node
-
-        Returns
-        -------
-
         """
 
         # mutate bias value of node

@@ -3,25 +3,23 @@ import math
 import random
 import numpy as np
 
-from gym_developmental.control_policies.pyneat.config import ELITISM, CUTOFF_PCT
-from gym_developmental.control_policies.pyneat.population import Population
-from gym_developmental.control_policies.pyneat.partitions import Partitions
-from gym_developmental.control_policies.pyneat.utils import visualize
+from pyneat.config import ELITISM, CUTOFF_PCT
+from pyneat.population import Population
+from pyneat.partitions import Partitions
+from pyneat.utils import visualize
 
 
 def next_generation(fitnesses, population, partitions):
     """
     Create next generation using current fitness, population and partitions
 
-    Parameters
-    ----------
-    fitnesses : dict of fitness values of genomes in current population
-    population : current population (all genomes)
-    partitions : current partitions/species
+    Args:
+        fitnesses (): dict of fitness values of genomes in current population
+        population : current population (all genomes)
+        partitions : current partitions/species
 
-    Returns
-    -------
-    new_population
+    Returns:
+        new_population (Population): Updated population for next generation.
 
     """
 
@@ -69,17 +67,16 @@ def run(eval_population_fn, args):
     """
     run NEAT
 
-    Parameters
-    ----------
-    eval_population_fn : function to evaluate population. Input for this function is instance of Population class.
-    args : arguments to initialize the population. `args` has the following attributes:
-        * population_size: initial size of population
-        * input_size: input size of the policy to be evolved
-        * output_size: output size of the policy to be evolved
-        * stop_threshold: threshold to stop the generations
-        * max_generations: int value of maximum number of generations
-        * stop_criterion: it can be a function that evaluates performance per generation by
-        aggregation of fitnesses of whole population. This function can be something like numpy.mean, numpy.max etc.
+    Args:
+        eval_population_fn (partial[]): function to evaluate population. Input for this function is instance of Population class.
+        args : arguments to initialize the population. `args` has the following attributes:
+            * population_size: initial size of population
+            * input_size: input size of the policy to be evolved
+            * output_size: output size of the policy to be evolved
+            * stop_threshold: threshold to stop the generations
+            * max_generations: int value of maximum number of generations
+            * stop_criterion: it can be a function that evaluates performance per generation by
+            aggregation of fitnesses of whole population. This function can be something like numpy.mean, numpy.max etc.
 
     Returns
     -------

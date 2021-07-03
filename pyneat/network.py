@@ -1,20 +1,20 @@
+from typing import Callable, Union, Iterable
+from pyneat.genome import Genome
+
 
 class EvalNode(object):
     """
-    Class to help in node/neuron evaluation in phenotype
+    Class to help in node (a.k.a. neuron) evaluation in phenotype.
+
+    Args:
+        node_id (int): id of node.
+        activation (Callable): activation function of node
+        aggregation (Callable): aggregation function of node
+        bias (float): bias of node
+        incoming_connections (list[Tuple[int, int]]): incoming connections to node
     """
 
-    def __init__(self, node_id, activation, aggregation, bias, incoming_connections):
-        """
-
-        Parameters
-        ----------
-        node_id : id of node
-        activation : activation function of node
-        aggregation : aggregation function of node
-        bias : bias of node
-        incoming_connections : incoming connections to node
-        """
+    def __init__(self, node_id, activation: Callable[[float], float], aggregation: Callable[[Union[list, tuple]], float], bias, incoming_connections):
 
         self.node_id = node_id
         self.activation = activation
@@ -23,21 +23,17 @@ class EvalNode(object):
         self.incoming_connections = incoming_connections
 
 
-class Network(object):
+class NeuralNetwork(object):
     """
-    Class to help in neural-network creation from genome.
-    Something like genotype to phenotype module.
+    Class to help in neural-network creation from genome. Something like ``genotype to phenotype`` module.
+
+    Args:
+        input_keys (list or tuple or Iterable): keys of input nodes
+        output_keys (list or tuple or Iterable): keys of output nodes
+        eval_nodes (list or tuple or Iterable): list of nodes to evaluate
     """
 
     def __init__(self, input_keys, output_keys, eval_nodes):
-        """
-
-        Parameters
-        ----------
-        input_keys : keys of input nodes
-        output_keys : keys of output nodes
-        eval_nodes : list of nodes to evaluate
-        """
         self.input_keys = input_keys
         self.output_keys = output_keys
         self.eval_nodes = eval_nodes
@@ -45,25 +41,20 @@ class Network(object):
     @classmethod
     def make_network(cls, genome):
         """
+        Make a network.
 
-        Parameters
-        ----------
-        genome : genome used for creation of network-phenotype
+        Args:
+            genome (Genome): genome used for creation of network-phenotype
 
-        Returns
-        -------
-        neural network phenotype of genome
+        Returns:
+            NeuralNetwork: neural network phenotype of genome
         """
 
-        edges = [edge.uv for edge in genome.edges.values() if edge.active]       # active edges in genome
+        edges = [edge.uv for edge in genome.edges.values() if edge.active]                                # active edges in genome
 
-        required_nodes = cls._required_nodes(edges,
-                                             genome.input_keys,
-                                             genome.output_keys)                 # nodes required for network creation
+        required_nodes = cls._required_nodes(edges, genome.input_keys, genome.output_keys)                # nodes required for network creation
 
-        layers = cls._make_layers(required_nodes,
-                                  edges,
-                                  genome.input_keys)                            # create network layers
+        layers = cls._make_layers(required_nodes, edges, genome.input_keys)     # create network layers
 
         eval_nodes = cls._make_eval_nodes(layers, edges, genome)                # create evaluation nodes
 
@@ -76,15 +67,13 @@ class Network(object):
         """
         Identify nodes that are required for output by working backwards from output nodes.
 
-        Parameters
-        ----------
-        edges : list of active edges in the network phenotype
-        input_keys :  list of input keys
-        output_keys : list of output keys
+        Args:
+            edges (list or tuple or Iterable): list of active edges in the network phenotype
+            input_keys (list or tuple or Iterable):  list of input keys
+            output_keys (list or tuple or Iterable): list of output keys
 
-        Returns
-        -------
-        set of nodes required for network creation
+        Returns:
+            set[int]: set of nodes required for network creation and that are between input and output nodes.
 
         """
 
@@ -113,32 +102,29 @@ class Network(object):
     @staticmethod
     def _make_layers(required_nodes, edges, input_keys):
         """
-        Make layers for the network
+        Make layers for the neural network.
 
-        Parameters
-        ----------
-        required_nodes : required nodes
-        edges : edges in the network
-        input_keys : input keys
+        Args:
+            required_nodes (set[int]): IDs of required nodes
+            edges (list[Tuple[int, int]] or Iterable[Tuple[int, int]]): edges in the network
+            input_keys (list[int] or Iterable[int]): IDs of input nodes.
 
-        Returns
-        -------
-        layers in the network. The returned value is a list containing set of nodes/neurons in each layer of network.
+        Returns:
+            list[set[int]]: Layers in the network. Each list element contains set of nodes IDs corresponding to that layer of neural network.
 
+        Notes:
+            * Nodes represent neurons in the network.
         """
 
         layers = []
         seen = set(input_keys)
         while True:
-
-            # Find candidate nodes for the next layer that connect a seen node to an unseen node.
-            candidates = set(v for (u, v) in edges if u in seen and v not in seen)
+            candidates = set(v for (u, v) in edges if u in seen and v not in seen)  # candidate nodes for next layer that connect a seen node to an unseen node.
 
             # Keep only required nodes whose entire input set is contained in seen.
             layer = set()
-            for w in candidates:                                                         # for node in candidate
-                # if node is requried and its input is in seen
-                if w in required_nodes and all(u in seen for (u, v) in edges if v == w):
+            for w in candidates:                         # for node in set of candidates
+                if w in required_nodes and all(u in seen for (u, v) in edges if v == w):  # if node is requried and its input is in seen
                     layer.add(w)
 
             if not layer:                               # if layer is empty
@@ -152,64 +138,54 @@ class Network(object):
     @staticmethod
     def _make_eval_nodes(layers, edges, genome):
         """
+        Make the evaluation nodes from nodes and edges information from genome. The evaluation nodes are phenotype or realization of neurons in the neural network.
 
-        Parameters
-        ----------
-        layers : layers in neural network
-        edges : edges in neural network connecting nodes/neurons
-        genome : genome or genotype of neural network.
+        Args:
+            layers list[set[int]]: Layers in neural network.
+            edges (list[Tuple[int, int]] or Iterable[Tuple[int, int]]): Edges in neural network connecting nodes.
+            genome (Genome): Genome or Genotype of neural network.
 
-        Returns
-        -------
-        list of EvalNodes or phenotype-neurons
+        Returns:
+            list[EvalNode]: list of EvalNodes or phenotype-neurons to evaluate during each iteration.
 
+        Notes:
+            * Nodes represent neurons in the network.
         """
 
         eval_nodes = []
 
-        for layer in layers:                                        # for each layer of nodes in network
-            for node in layer:                                      # for each node in layer
-
-                # incomming edges to node
-                incoming_conns = [(u, genome.edges[u, v].weight) for u, v in edges if v == node]
-
-                eval_node = EvalNode(node_id=node,
-                                     activation=genome.nodes[node].activation,
-                                     aggregation=genome.nodes[node].aggregation,
-                                     bias=genome.nodes[node].bias,
-                                     incoming_connections=incoming_conns)
-
+        for layer in layers:                                                                            # for each layer of nodes in network
+            for node in layer:                                                                          # for each node in layer
+                incoming_conns = [(u, genome.edges[u, v].weight) for u, v in edges if v == node]        # incomming edges to node
+                eval_node = EvalNode(node_id=node, activation=genome.nodes[node].activation, aggregation=genome.nodes[node].aggregation, bias=genome.nodes[node].bias, incoming_connections=incoming_conns)
                 eval_nodes.append(eval_node)
         return eval_nodes
 
     def forward(self, x):
         """
-        forward pass in the network
+        Forward pass of the neural network.
 
-        Parameters
-        ----------
-        x : input
+        Args:
+            x (list[float or int] or tuple[float or int] or Iterable[float or int] or numpy.ndarray): Input to the Neural network.
 
-        Returns
-        -------
-        output-vector (list) of neural network for the given input vector
-
+        Returns:
+            list[float]: Neural network output for the given input vector.
         """
 
-        values = {k: 0.0 for k in self.input_keys + self.output_keys}
+        values = {k: 0.0 for k in self.input_keys + self.output_keys}           # initailize ``values`` dict with input and output neuron values.
 
-        for k, v in zip(self.input_keys, x):
+        for k, v in zip(self.input_keys, x):                                          # populate input neuron ``values`` with given input
             values[k] = v
 
-        for eval_node in self.eval_nodes:                       # for each neuron in network
+        for eval_node in self.eval_nodes:                                             # for each neuron in network
             node_inputs = []
-
-            for i, w in eval_node.incoming_connections:         # for in_node_id, edge_wt in incoming connection to node
-                node_inputs.append((values[i] * w))             # collect input to this node from in_node_id
-
-            agg = eval_node.aggregation(node_inputs)            # aggregation of all in_node_ids to this node
-
+            for i, w in eval_node.incoming_connections:                               # for in_node_id, edge_wt in incoming connection to node
+                node_inputs.append((values[i] * w))                                   # collect input to this node from in_node_id
+            agg = eval_node.aggregation(node_inputs)                                  # aggregation of all in_node_ids to this node
             values[eval_node.node_id] = eval_node.activation(eval_node.bias + agg)    # activation of this neuron/node
 
         outputs = [values[n] for n in self.output_keys]             # values of neurons
         return outputs
+
+    def __call__(self, x):
+        return self.forward(x)

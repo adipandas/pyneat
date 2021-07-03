@@ -1,55 +1,28 @@
-import random
 from copy import deepcopy
 from collections import defaultdict
+from typing import Callable
 import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
 
-
-def crossover(obj1, obj2, obj_new, attrs):
-    """
-    crossover logic to do the crossover of two parent objects (viz. `obj1` and `obj2`)
-    to update child object (i.e. obj_new) with some given attributes `attrs`.
-    Crossover logic sets each attribute in list of attributes for the child object with values taken from either of the
-    parent objects with probability of 50%.
-
-    Parameters
-    ----------
-    obj1 : parent object 1
-    obj2 : parent object 2
-    obj_new : child object
-    attrs : list of attributes to update in child object
-
-    Returns
-    -------
-    updated child object after cross over
-
-    """
-
-    for attr in attrs:                                      # for each attribute in list of input attributes
-        if random.random() > 0.5:                           # choose one of the parents (obj1) with 50% chance
-            setattr(obj_new, attr, getattr(obj1, attr))     # set the attribute of child with parent obj1 value
-        else:                                               # choose other parent (obj2) with 50% chance
-            setattr(obj_new, attr, getattr(obj2, attr))     # set the attribute of child with parent obj2 value
-
-    return obj_new
+from pyneat.genome import Genome
+from pyneat.node import Node
 
 
 def creates_cycle(edges, u, v):
     """
-    Check if the edge (u, v) form a cycle in genome (neural network).
-    Check if there is a path from node `v` to node `u` in network
-    Note: Genome is a DIRECTED graph.
+    Check if the edge (u, v) form a cycle in genome (neural network). Check if there is a path from node `v` to node `u` in network
 
-    Parameters
-    ----------
-    edges : list of edges in the genome
-    u : in-node for potential edge
-    v : out-node for potential edge
+    Args:
+        edges (list[Tuple[int, int]] or KeysView[Tuple[int, int]]): List of edge IDs in the genome.
+        u (int): ID of in-node for potential edge.
+        v (int): ID of out-node for potential edge.
 
-    Returns
-    -------
-    bool if true, indicates the edge u, v forms a cycle in genome (neural network).
+    Returns:
+        bool: If ``True``, indicates the edge ``u, v`` forms a cycle in genome (neural network).
+
+    Note:
+        * Genome is a **DIRECTED** graph.
 
     """
 
@@ -84,16 +57,11 @@ def creates_cycle(edges, u, v):
 
 def visualize(candidate, stats):
     """
-    Visualizing the phenotype/neural network
+    Visualizing the phenotype (a.k.a. neural network).
 
-    Parameters
-    ----------
-    candidate : neural network candidate
-    stats : dict containing the statistics of genome
-
-    Returns
-    -------
-
+    Args:
+        candidate (Genome): Neural network candidate.
+        stats (dict[str, float or int or list or tuples]): Dict containing the statistics of genome.
     """
 
     # -------- plot statistics and show ------------
@@ -110,18 +78,15 @@ def visualize(candidate, stats):
     V = candidate.nodes             # vertices/nodes in graph
     E = candidate.edges             # edges in graph
 
-    def a_names(a):
+    def a_names(a: Callable[[float], float]):
         """
         Name of activation function
 
-        Parameters
-        ----------
-        a : activation
+        Args:
+            a (Callable[[float], float]): Activation function
 
-        Returns
-        -------
-        string-name of activation function
-
+        Returns:
+            str: string-name of activation function
         """
         if 'sigmoid' in a.__name__:
             return 'σ()'
@@ -129,15 +94,13 @@ def visualize(candidate, stats):
 
     def color(v):
         """
+        Color.
 
-        Parameters
-        ----------
-        v : nodes/vertex in graph
+        Args:
+            v (Node): nodes/vertex in graph
 
-        Returns
-        -------
-        color of vertex, green for input, red for output, blue for hidden
-
+        Returns:
+            str: color of vertex, green for input, red for output, blue for hidden
         """
         if v in candidate.input_keys:
             return "green"
@@ -167,11 +130,8 @@ def visualize(candidate, stats):
                     del e_label[i, j]
 
     pos = nx.drawing.nx_agraph.pygraphviz_layout(G, prog='dot')
-
     pos = {k: (v[0], -v[1]) for k, v in pos.items()}
-
     nx.draw(G, pos=pos, node_color=[color(k) for k in G.nodes])
     nx.draw_networkx_labels(G, labels=v_label, pos=pos)
     nx.draw_networkx_edge_labels(G, edge_labels=e_label, pos=pos)
-
     plt.show()

@@ -1,1 +1,3 @@
-# pyneat
+"""
+Neuro evolution of Augmenting Topologies (NEAT)
+"""

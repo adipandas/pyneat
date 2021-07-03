@@ -1,24 +1,21 @@
 import numpy as np
 from itertools import count
-from gym_developmental.control_policies.pyneat.config import COMPATIBILITY_THRESHOLD, \
-    MIN_FITNESS_RANGE, MIN_SPECIES_SIZE
+from pyneat.config import COMPATIBILITY_THRESHOLD, MIN_FITNESS_RANGE, MIN_SPECIES_SIZE
+from pyneat.genome import Genome
+from pyneat.population import Population
 
 
 class Partition(object):
     """
-    Class to be used as container of partitions. Group candidates according to some distance function.
-    It is also referred as `Speciation` in NEAT.
+    Class to be used as container of partitions. Group candidates according to some distance function. It is referred as **Speciation** in NEAT.
+
+    Args:
+        key (int): unique key/id of partition
+        members (list): members of partition/species. Default is empty list [].
+        representative (Genome): representative of partition, instance of `Genome` class
     """
 
     def __init__(self, key, members=[], representative=None):
-        """
-
-        Parameters
-        ----------
-        key : unique key/id of partition
-        members : members of partition/species. Default is empty list [].
-        representative : representative of partition, instance of `Genome` class
-        """
         self.key = key
         self.members = members
         self.representative = representative
@@ -27,15 +24,12 @@ class Partition(object):
         """
         New representative is the closest candidate from `gids` to the current representative.
 
-        Parameters
-        ----------
-        gids : set of genome ids which do not belong to any partition
-        population : population containing genomes in which we have to find the representative, instance of Population
+        Args:
+            gids (set or list or tuple): set of genome ids which do not belong to any partition
+            population (Population): population containing genomes in which we have to find the representative, instance of Population
 
-        Returns
-        -------
-        Closest candidate genome to the current representative.
-
+        Returns:
+            Genome: Closest candidate genome to the current representative.
         """
 
         candidates = []
@@ -50,30 +44,33 @@ class Partition(object):
 class Partitions(object):
     """
     Class which is a container for various partitions (or various species). It contains set of species.
+
+    Notes:
+        * Partition is a species
     """
 
     partition_count = count(1)
 
     def __init__(self):
-        self.pid_to_partition = {}                              # dict to store mapping from partition_id to partition
-        self.gid_to_pid = {}                                    # dict to store mapping from genome_id to partition
+        self.pid_to_partition = dict()
+        """dict[int, Partition] to store mapping from partition_id to partition"""
+
+        self.gid_to_pid = {}
+        """dict[int, int]: to store mapping from genome_id to partition
+        """
 
     def new_partition(self, pid, members, representative):
         """
         Create new partition in population.
-        NOTE: partition == species
 
-        Parameters
-        ----------
-        pid : partition id
-        members : members/candidates from population to be included in the partition/species
-        representative : representative of the new partition (genome representing the new species/partition)
+        Parameters:
+            pid (id): partition id
+            members (list[int]): members/candidates from population to be included in the partition/species
+            representative (Genome): representative of the new partition (genome representing the new species/partition)
 
-        Returns
-        -------
-
+        Notes:
+            * Partition is a species
         """
-
         if pid is None:
             pid = next(Partitions.partition_count)                      # create a partition/species id
 
@@ -84,14 +81,14 @@ class Partitions(object):
         """
         Evaluate closest representative of a species to input genome
 
-        Parameters
-        ----------
-        genome : genome or neural network
+        Args:
+            genome (Genome): genome or neural network.
 
-        Returns
-        -------
-        id of species which is closest to input genome
+        Returns:
+            int: id of species which is closest to input genome
 
+        Notes:
+            * Partition is a species
         """
 
         candidates = []
@@ -109,21 +106,19 @@ class Partitions(object):
 
     def adjust_fitnesses(self, fitnesses):
         """
-        Adjust fitnesses is calculated for each species/partition. Mean fitness of each species is evaluated.
-        This mean fitness is then normalized.
-        The normalized fitness is returned as adjusted fitness.
+        Adjust fitnesses is calculated for each partition (a.k.a. species). Mean fitness of each partition is evaluated. This mean fitness is then normalized. The normalized fitness is returned as adjusted fitness.
 
-        Parameters
-        ----------
-        fitnesses : dict of fitnesses of genomes in population.
+        Args:
+            fitnesses (dict[int, float]): dictionary of fitnesses of genomes in population.
 
-        Returns
-        -------
-        dict of adjusted (normalized) fitnesses of each species/partition.
+        Returns:
+            dict[int, float]: of adjusted (normalized) fitnesses of each partition.
 
+        Notes:
+            * Partition is a species
         """
 
-        partition_adjusted_fitnesses = {}
+        partition_adjusted_fitnesses = dict()
 
         min_fitness = min(fitnesses.values())
         max_fitness = max(fitnesses.values())
@@ -141,19 +136,16 @@ class Partitions(object):
         """
         Decide partition sizes for the next generation by fitness. Based on Neat-Python.
 
-        Parameters
-        ----------
-        partition_adjusted_fitnesses : adjusted (normalized) fitness of each generation
-        pop_size :  size of population.
+        Args:
+            partition_adjusted_fitnesses (dict[int, float]): adjusted (normalized) fitness of each generation's species
+            pop_size (int):  size of population.
 
-        Returns
-        -------
-        dict of population size of each partition
+        Returns:
+            dict[]: dict of population size of each partition
 
         """
 
-        # partition size for each species in previous generation
-        previous_sizes = {pid: len(p.members) for pid, p in self.pid_to_partition.items()}
+        previous_sizes = {pid: len(p.members) for pid, p in self.pid_to_partition.items()}  # partition size for each species in previous generation
 
         af_sum = sum(partition_adjusted_fitnesses.values())     # sum of adjusted fitness of each partition
 
@@ -185,7 +177,5 @@ class Partitions(object):
 
         normalizer = pop_size / sum(sizes.values())
 
-        sizes = {pid: max(MIN_SPECIES_SIZE,
-                          int(round(size * normalizer))) for pid, size in sizes.items()}
-
+        sizes = {pid: max(MIN_SPECIES_SIZE, int(round(size * normalizer))) for pid, size in sizes.items()}
         return sizes

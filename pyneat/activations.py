@@ -1,51 +1,59 @@
-import math
 import numpy as np
 
 
-def sigmoid(z):
+def sigmoid(z, a_min=-60.0, a_max=60.0, scale_factor=2.5):
     """
+    Sigmoid Activation function.
 
-    Parameters
-    ----------
-    z : input
+    Args:
+        z (float or numpy.ndarray): Input.
+        a_min (float): Lower limit of activation input.
+        a_max (float): Upper limit of activation input.
+        scale_factor (float): scaling factor for the input ``z``.
 
-    Returns
-    -------
-    value of sigmoid function for input z
+    Returns:
+        float or numpy.ndarray: Output of activation
 
+    Notes:
+        * Before calculating the output using in this activation following steps are done in this function:
+            - Scaling of input value: Input ``z`` is scaled to ``scale_factor*z``.
+            - The value of ``scale_factor*z`` is clipped and kept in the range ``[a_min, a_max]``.
     """
-    z = max(-60.0, min(60.0, 2.5 * z))
-    return 1.0 / (1.0 + math.exp(-z))
+    z = np.clip(scale_factor * z, a_min, a_max)
+    return 1.0 / (1.0 + np.exp(-z))
 
 
-def tanh(z):
+def tanh(z, a_min=-60.0, a_max=60.0, scale_factor=2.5):
     """
-    Hyperbolic Tangent function
+    Tanh activation.
 
-    Parameters
-    ----------
-    z : input
+    Args:
+        z (float or numpy.ndarray): Input.
+        a_min (float): Lower limit of activation input.
+        a_max (float): Upper limit of activation input.
+        scale_factor (float): scaling factor for the input ``z``.
 
-    Returns
-    -------
-    value of hyperbolic tangent
+    Returns:
+        float or numpy.ndarray: Output of activation
 
+    Notes:
+        * Before calculating the output using in this activation following steps are done in this function:
+            - Scaling of input value: Input ``z`` is scaled to ``scale_factor*z``.
+            - The value of ``scale_factor*z`` is clipped and kept in the range ``[a_min, a_max]``.
     """
-    z = max(-60.0, min(60.0, 2.5 * z))
+    z = np.clip(scale_factor * z, a_min, a_max)
     return np.tanh(z)
 
 
 def relu(z):
     """
-    Rectilinear Unit
+    Rectilinear Unit.
 
-    Parameters
-    ----------
-    z : input to rectilinear unit
+    Args:
+        z (float or numpy.ndarray): Input.
 
-    Returns
-    -------
-    value of relu function
+    Returns:
+        float or numpy.ndarray: Output of activation.
 
     """
     return np.maximum(z, 0)
@@ -53,15 +61,13 @@ def relu(z):
 
 def abs(z):
     """
-    Absolue value
+    Absolute value.
 
-    Parameters
-    ----------
-    z : input
+    Args:
+        z (float or numpy.ndarray): Input.
 
-    Returns
-    -------
-    absolute value of input
+    Returns:
+        float or numpy.ndarray: Output of activation.
 
     """
     return np.abs(z)

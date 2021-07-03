@@ -10,9 +10,8 @@ if __name__ == '__main__':
     import argparse
     import gym
 
-    from gym_developmental.control_policies.pyneat.evaluate_population import xor_eval_population, \
-        create_gym_eval_population_fn
-    from gym_developmental.control_policies.pyneat.neat import run
+    from pyneat.evaluate_population import xor_eval_population, create_gym_eval_population_fn
+    from pyneat.neat import run
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--task', choices=['xor', 'cartpole', 'lunar'], required=True)
