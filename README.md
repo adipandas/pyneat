@@ -1,9 +1,9 @@
 # NEAT: NeuroEvolution of Augmenting Topologies
 
- Environments | Plot (reward vs. iterations) | Network Architecture
+ Environments | Plot (reward vs. generations) | Evolved Neural Network Architecture
 :---: | :---: | :---:
-<img src="media/inverted_pendulum.gif" width="250" height="200"/> | <img src="media/inverted_pendulum_NEAT.png" width="250" height="200"/> | <img src="media/inverted_pendulum_network_NEAT.png" width="250" height="200"/>
-<img src="media/lunar_lander.gif" width="250" height="200"/> | <img src="media/lunar_lander_NEAT.png" width="250" height="200"/> | <img src="media/lunar_lander_network_NEAT.png" width="250" height="200"/>
+<img src="media/inverted_pendulum.gif" width="275" height="200"/> | <img src="media/inverted_pendulum_NEAT.png" width="275" height="200"/> | <img src="media/inverted_pendulum_network_NEAT.png" width="275" height="200"/>
+<img src="media/lunar_lander.gif" width="275" height="200"/> | <img src="media/lunar_lander_NEAT.png" width="275" height="200"/> | <img src="media/lunar_lander_network_NEAT.png" width="275" height="200"/>
 
 ## Installation
 
