@@ -7,9 +7,9 @@
 
 # NEAT: NeuroEvolution of Augmenting Topologies
 
- Policies | Plot (reward vs. iterations) | Network Architecture
+ Environments | Plot (reward vs. iterations) | Network Architecture
 :---: | :---: | :---:
-![inverted_pendulum_gif][inverted_pendulum_gif] | ![inverted_pendulum_plot][inverted_pendulum_plot] | ![inverted_pendulum_neural_network][inverted_pendulum_neural_network]
+<img src="media/inverted_pendulum.gif" width="250" height="250"/> | <img src="media/inverted_pendulum.gif" width="250" height="250"/> | <img src="media/inverted_pendulum.gif" width="250" height="250"/>
  ![lunar_lander_gif][lunar_lander_gif] | ![lunar_lander_plot][lunar_lander_plot] | ![lunar_lander_neural_network][lunar_lander_neural_network]
 
 ## Installation
