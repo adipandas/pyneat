@@ -31,9 +31,11 @@ For any customization:
 
 ## References:
 * Stanley, Kenneth O., and Risto Miikkulainen. "Efficient evolution of neural network topologies." Proceedings of the 2002 Congress on Evolutionary Computation. CEC'02 (Cat. No. 02TH8600). Vol. 2. IEEE, 2002.
-* neat-python: https://github.com/CodeReclaimers/neat-python
+* **neat-python**: [https://github.com/CodeReclaimers/neat-python](https://github.com/CodeReclaimers/neat-python)
 
-You should use the following implementation for additional (advanced) functionalities.
+Refer the following implementation for additional (advanced) functionalities.
 * [https://github.com/google/brain-tokyo-workshop/tree/master/WANNRelease/prettyNEAT](https://github.com/google/brain-tokyo-workshop/tree/master/WANNRelease/prettyNEAT) 
+* [MultiNEAT](https://github.com/peter-ch/MultiNEAT)
+* [pureples](https://github.com/ukuleleplayer/pureples)
 
 **Please let me know if you come across any bugs in this implementation. Feel free to send any pull requests.**
