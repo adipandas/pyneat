@@ -1,4 +1,6 @@
-# NEAT: NeuroEvolution of Augmenting Topologies
+# pyneat
+
+This is an implementation of **NEAT: NeuroEvolution of Augmenting Topologies** in Python.
 
  Environments | Plot (reward vs. generations) | Evolved Neural Network Architecture
 :---: | :---: | :---:
